@@ -18,10 +18,10 @@ df['anomaly'] = model.predict(df_cleaned)
 print("🔍 Anomaly Detection Result:")
 print(df[df['anomaly'] == -1])  # -1 = anomaly, 1 = normal
 
-# Filter only anomalies
-anomalies = result[result['anomaly'] == -1]
+# Step 6: Filter and Save Anomalies
+anomalies = df[df['anomaly'] == -1]
 
-# Save to Markdown file
+# Save anomalies to Markdown file
 if not anomalies.empty:
     anomalies.to_markdown("anomaly_report.md", index=False)
     print("\n📄 Anomaly Report saved to 'anomaly_report.md'")
