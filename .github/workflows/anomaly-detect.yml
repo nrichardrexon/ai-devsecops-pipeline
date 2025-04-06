@@ -26,4 +26,13 @@ jobs:
         pip install pandas scikit-learn tabulate
 
     - name: 🚀 Run Anomaly Detection
-      run: python detect.py
+      run: |
+        python detect.py
+        if [ -f anomaly_report.md ]; then
+          echo "❗ Anomalies detected — Failing build"
+          cat anomaly_report.md
+          exit 1
+        else
+          echo "✅ No anomalies found"
+        fi
+      
