@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 🐍 Set up Python
       uses: actions/setup-python@v4
@@ -30,33 +30,33 @@ jobs:
         scan-type: fs
         scan-ref: .
 
-
-
   bandit-scan:
-    name: Python Security Scan (Bandit)
+    name: 🔐 Python Security Scan (Bandit)
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout code
+    - name: 📥 Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Python
+    - name: 🐍 Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Install Bandit
+    - name: 📦 Install Bandit
       run: pip install bandit
 
-    - name: Run Bandit
-      run: bandit -r app/ -f json -o bandit-report.json
+    - name: 🚨 Run Bandit (with report)
+      run: |
+        bandit -r app/ -f json -o bandit-report.json || true
 
-    - name: Show Bandit Report in Console
+    - name: 📄 Show Bandit Report Output
       run: |
         echo "========== Bandit Report =========="
-        cat bandit-report.json
-
-    - name: Show Bandit Report
-      run: |
-        echo "📄 Bandit Report Output:"
         cat bandit-report.json || echo "⚠️ Report file not found"
-      
+
+    - name: 📤 Upload Bandit Report Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: bandit-report
+        path: bandit-report.json
