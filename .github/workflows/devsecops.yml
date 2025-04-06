@@ -51,3 +51,5 @@ jobs:
           This PR was automatically created by the DevSecOps pipeline.
           It contains updates to outdated dependencies found during security checks.
         branch: auto-fix-${{ github.run_id }}
+        base: main   # ✅ Added base branch to prevent PR error
+        commit-message: "[CI Auto-Fix] Updated requirements.txt"
