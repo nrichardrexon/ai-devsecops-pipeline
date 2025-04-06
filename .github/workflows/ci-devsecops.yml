@@ -14,24 +14,24 @@ jobs:
       security-events: write
 
     steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v3
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
 
-    - name: 🐍 Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-    - name: 📦 Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flask
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flask
 
-    - name: 🚨 Scan with Trivy (Docker & Code Vulnerabilities)
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: fs
-        scan-ref: .
+      - name: 🚨 Scan with Trivy (Docker & Code Vulnerabilities)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
 
   bandit-scan:
     name: 🔐 Python Security Scan (Bandit)
@@ -41,31 +41,31 @@ jobs:
       security-events: write
 
     steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v3
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
 
-    - name: 🐍 Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: 📦 Install Bandit
-      run: pip install bandit
+      - name: 📦 Install Bandit
+        run: pip install bandit
 
-    - name: 🚨 Run Bandit (with report)
-      run: |
-        bandit -r app/ -f json -o bandit-report.json || true
+      - name: 🚨 Run Bandit (with report)
+        run: |
+          bandit -r app/ -f json -o bandit-report.json || true
 
-    - name: 📄 Show Bandit Report Output
-      run: |
-        echo "========== Bandit Report =========="
-        cat bandit-report.json || echo "⚠️ Report file not found"
+      - name: 📄 Show Bandit Report Output
+        run: |
+          echo "========== Bandit Report =========="
+          cat bandit-report.json || echo "⚠️ Report file not found"
 
-    - name: 📤 Upload Bandit Report Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: bandit-report
-        path: bandit-report.json
+      - name: 📤 Upload Bandit Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
 
   gitleaks-scan:
     name: 🔐 Secrets Scan (Gitleaks)
@@ -81,9 +81,9 @@ jobs:
       - name: 🔍 Scan for Secrets using Gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
-          config-path: .github/gitleaks.toml # optional if you want custom rules
+          config-path: .github/gitleaks.toml
         env:
-          GITLEAKS_LICENSE_KEY: ${{ secrets.GITLEAKS_LICENSE_KEY }} # Optional for enterprise
+          GITLEAKS_LICENSE_KEY: ${{ secrets.GITLEAKS_LICENSE_KEY }}
 
   codeql-analysis:
     name: 🧠 CodeQL Analysis
@@ -137,3 +137,78 @@ jobs:
         with:
           name: dependency-check-report
           path: reports
+
+  checkov-scan:
+    name: 🛡️ IaC Security Scan (Checkov)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 📦 Install Checkov
+        run: pip install checkov
+
+      - name: 🚨 Run Checkov on Infrastructure Files
+        run: |
+          checkov -d . --quiet --output json > checkov-report.json || true
+
+      - name: 📄 Show Checkov Report Output
+        run: |
+          echo "========== Checkov Report =========="
+          cat checkov-report.json || echo "⚠️ Report not found"
+
+      - name: 📤 Upload Checkov Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkov-report
+          path: checkov-report.json
+
+  gmail-notify:
+    name: 💌 Gmail Notification
+    runs-on: ubuntu-latest
+    if: failure()
+    needs:
+      - build-and-scan
+      - bandit-scan
+      - gitleaks-scan
+      - codeql-analysis
+      - dependency-check
+      - checkov-scan
+
+    steps:
+      - name: 📥 Download All Report Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: 📧 Send Email Notification with Attachments
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_APP_PASSWORD }}
+          subject: "❌ DevSecOps CI Pipeline FAILED for ${{ github.repository }}"
+          html_body: |
+            <h2>🚨 DevSecOps CI Pipeline FAILED</h2>
+            <p><strong>Repository:</strong> ${{ github.repository }}</p>
+            <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+            <p><strong>Triggered by:</strong> ${{ github.actor }}</p>
+            <p>🔗 <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Workflow Run</a></p>
+            <h3>📋 Scan Summary:</h3>
+            <ul>
+              <li>🛡️ <b>Bandit:</b> Python Static Analysis</li>
+              <li>🔐 <b>Gitleaks:</b> Secret Detection</li>
+              <li>🧠 <b>CodeQL:</b> Code Vulnerability Detection</li>
+              <li>📦 <b>OWASP Dependency-Check:</b> CVE Analysis</li>
+              <li>🧱 <b>Checkov:</b> Infrastructure-as-Code Scan</li>
+              <li>🐋 <b>Trivy:</b> Docker & Filesystem Scan</li>
+            </ul>
+            <p>📎 Reports are attached for detailed findings.</p>
+          to: yourname@gmail.com
+          from: "GitHub CI <${{ secrets.EMAIL_USERNAME }}>"
+          attachments: |
+            artifacts/bandit-report/bandit-report.json
+            artifacts/checkov-report/checkov-report.json
+            artifacts/dependency-check-report/reports/dependency-check-report.html
