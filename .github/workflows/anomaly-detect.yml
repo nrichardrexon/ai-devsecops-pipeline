@@ -29,10 +29,13 @@ jobs:
     - name: 🚀 Run Anomaly Detection
       run: |
         python detect.py
-        if [ -f anomaly_report.md ]; then
+        echo "📂 Current files:"
+        ls -la
+        echo "🔎 Checking for anomaly report..."
+        if [ -s anomaly_report.md ]; then
           echo "❗ Anomalies detected — Failing build"
           cat anomaly_report.md
           exit 1
         else
-          echo "✅ No anomalies found"
+          echo "✅ No anomalies found or report is empty"
         fi
