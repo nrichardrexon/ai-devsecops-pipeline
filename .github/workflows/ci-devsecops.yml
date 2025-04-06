@@ -9,6 +9,9 @@ on:
 jobs:
   build-and-scan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
     - name: 📥 Checkout code
@@ -33,6 +36,9 @@ jobs:
   bandit-scan:
     name: 🔐 Python Security Scan (Bandit)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
     - name: 📥 Checkout code
@@ -64,6 +70,9 @@ jobs:
   gitleaks-scan:
     name: 🔐 Secrets Scan (Gitleaks)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: 📥 Checkout code
@@ -75,7 +84,6 @@ jobs:
           config-path: .github/gitleaks.toml # optional if you want custom rules
         env:
           GITLEAKS_LICENSE_KEY: ${{ secrets.GITLEAKS_LICENSE_KEY }} # Optional for enterprise
-
 
   codeql-analysis:
     name: 🧠 CodeQL Analysis
