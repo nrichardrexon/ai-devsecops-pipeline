@@ -1,0 +1,48 @@
+name: 🛡️ Security & Anomaly Check
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Checkout repo
+      uses: actions/checkout@v3
+
+    - name: 🔍 Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      with:
+        config-path: .gitleaks.toml  # or .gitleaks.yml
+      env:
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: 📦 Install Python dependencies
+      run: |
+        pip install pandas scikit-learn
+
+    - name: 🚀 Run Anomaly Detection
+      run: python detect.py
+
+    - name: 📄 Upload anomaly report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: anomaly-report
+        path: anomaly_report.md
+
+    - name: ❌ Fail if anomaly_report.md exists
+      if: always()
+      run: |
+        if [ -f anomaly_report.md ]; then
+          echo "Anomalies detected — Failing build"
+          exit 1
+        fi
