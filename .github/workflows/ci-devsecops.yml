@@ -54,3 +54,9 @@ jobs:
       run: |
         echo "========== Bandit Report =========="
         cat bandit-report.json
+
+    - name: Show Bandit Report
+      run: |
+        echo "📄 Bandit Report Output:"
+        cat bandit-report.json || echo "⚠️ Report file not found"
+      
