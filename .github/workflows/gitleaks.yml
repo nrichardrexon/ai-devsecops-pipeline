@@ -1,0 +1,40 @@
+name: 🔐 Gitleaks Secret Scan + Auto Issue
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  gitleaks-scan:
+    runs-on: ubuntu-latest
+    name: Run Gitleaks Secret Scan
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🕵️‍♂️ Run Gitleaks
+        uses: zricethezav/gitleaks-action@v2
+        with:
+          args: detect --report-path=gitleaks_report.json --exit-code 0
+
+      - name: 📤 Upload report
+        uses: actions/upload-artifact@v3
+        with:
+          name: gitleaks-report
+          path: gitleaks_report.json
+
+      - name: 🚨 Create GitHub Issue if secrets found
+        if: success()  # Run regardless of Gitleaks findings
+        run: |
+          if grep -q '"RuleID":' gitleaks_report.json; then
+            echo "Secrets found! Creating GitHub Issue..."
+            gh issue create --title "🚨 Secrets detected by Gitleaks" \
+              --body "$(cat gitleaks_report.json | jq '.[] | "File: \(.File)\nSecret: \(.Secret)\nRule: \(.RuleID)\n---"' | head -n 30)"
+          else
+            echo "✅ No secrets found!"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,12 @@
+[allowlist]
+description = "Skip known false positives"
+
+[[rules]]
+description = "AWS Access Key"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["key", "AWS"]
+
+[[rules]]
+description = "Generic API Key"
+regex = '''(?i)(api_key|apikey|secret)[\s:=]+["']?[a-z0-9_\-]{16,}["']?'''
+tags = ["key", "API"]
