@@ -25,7 +25,7 @@ jobs:
 
     - name: 🔍 Auto-Fix Outdated Packages
       run: |
-        python scripts/auto_fix.py
+        python auto_fix.py
 
     - name: 🚨 Show Updated requirements.txt
       run: |
