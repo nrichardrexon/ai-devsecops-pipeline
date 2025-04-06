@@ -1,0 +1,10 @@
+[INFO] Starting build process
+[INFO] Checking out code from main branch
+[INFO] Running unit tests
+[INFO] All unit tests passed
+[INFO] Running lint checks
+[WARN] Lint warning in file utils.py line 23
+[INFO] Deploying to staging
+[ERROR] Failed to deploy to staging due to timeout
+[INFO] Retrying deployment
+[INFO] Deployment successful
