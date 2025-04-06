@@ -36,22 +36,21 @@ jobs:
     name: Python Security Scan (Bandit)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      - name: Install Bandit
-        run: pip install bandit
+    - name: Install Bandit
+      run: pip install bandit
 
-      - name: Run Bandit
-        run: bandit -r app/ -f json -o bandit-report.json
+    - name: Run Bandit
+      run: bandit -r app/ -f json -o bandit-report.json
 
-      - name: Upload Bandit Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: bandit-report
-          path: bandit-report.json
+    - name: Show Bandit Report in Console
+      run: |
+        echo "========== Bandit Report =========="
+        cat bandit-report.json
