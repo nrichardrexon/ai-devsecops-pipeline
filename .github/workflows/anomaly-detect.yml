@@ -25,6 +25,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install pandas scikit-learn tabulate
 
+    - name: ✅ Verify tabulate is installed
+      run: pip show tabulate
+
     - name: 🚀 Run Anomaly Detection
       run: |
         python detect.py
@@ -35,4 +38,3 @@ jobs:
         else
           echo "✅ No anomalies found"
         fi
-      
