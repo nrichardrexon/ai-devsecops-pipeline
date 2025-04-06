@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.ensemble import IsolationForest
+import os
 
 # Step 1: Load the dataset
 df = pd.read_csv('mock_pipeline_data.csv')
@@ -21,9 +22,20 @@ print(df[df['anomaly'] == -1])  # -1 = anomaly, 1 = normal
 # Step 6: Filter and Save Anomalies
 anomalies = df[df['anomaly'] == -1]
 
-# Save anomalies to Markdown file
+# Step 7: Save anomaly report with fallback
 if not anomalies.empty:
-    anomalies.to_markdown("anomaly_report.md", index=False)
-    print("\n📄 Anomaly Report saved to 'anomaly_report.md'")
+    try:
+        from tabulate import tabulate
+        anomalies.to_markdown("anomaly_report.md", index=False)
+        print("\n📄 Anomaly Report saved to 'anomaly_report.md'")
+    except ImportError:
+        print("\n⚠️ 'tabulate' not found. Saving fallback CSV report.")
+        anomalies.to_csv("anomaly_report.csv", index=False)
+        # Create a dummy markdown file to avoid workflow break
+        with open("anomaly_report.md", "w") as f:
+            f.write("# Anomaly Report\n\nTabulate module missing. See anomaly_report.csv instead.")
 else:
     print("\n✅ No anomalies detected.")
+    # Ensure markdown file is absent if no anomalies
+    if os.path.exists("anomaly_report.md"):
+        os.remove("anomaly_report.md")
