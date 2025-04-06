@@ -1,0 +1,3 @@
+AKIA...EXAMPLEKEY==***REMOVED***
+wJalr...EXAMPLE==***REMOVED***
+sidekiq_secret_here==***REMOVED***
