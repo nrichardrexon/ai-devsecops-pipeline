@@ -23,10 +23,8 @@ jobs:
     - name: 📦 Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pandas scikit-learn tabulate
-
-    - name: ✅ Verify tabulate is installed
-      run: pip show tabulate
+        pip install --no-cache-dir --no-user pandas scikit-learn tabulate
+        python -c "import tabulate; print('✅ tabulate installed:', tabulate.__version__)"
 
     - name: 🚀 Run Anomaly Detection
       run: |
