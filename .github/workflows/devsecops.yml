@@ -1,0 +1,41 @@
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  devsecops:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Install Dependencies
+      run: |
+        cd app
+        pip install -r requirements.txt
+
+    - name: 🔍 Auto-Fix Outdated Packages
+      run: |
+        python scripts/auto_fix.py
+
+    - name: 🚨 Show Updated requirements.txt
+      run: |
+        echo "🔧 Final updated requirements:"
+        cat app/requirements.txt
+
+    - name: 🔧 Commit & Push Changes (Auto-Fix)
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git commit -m "🔧 Auto-fixed outdated packages [CI Auto-Commit]" || echo "No changes to commit"
+        git push
