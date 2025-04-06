@@ -114,3 +114,26 @@ jobs:
 
       - name: 🔍 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+
+  dependency-check:
+    name: 📦 OWASP Dependency-Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🛡️ Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: ai-devsecops-pipeline
+          format: 'HTML'
+          out: reports
+          scan: .
+          failOnCVSS: 7
+
+      - name: 📤 Upload Dependency-Check Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: reports
