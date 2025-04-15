@@ -51,13 +51,13 @@ jobs:
 
     - name: 📝 Append to anomaly_report.md and check for anomalies
       run: |
-        # Append new anomalies to the report
-        echo "# Anomaly Report" >> anomaly_report.md
-        echo "" >> anomaly_report.md
-        echo "⚠️ The \`prettytable\` module is missing." >> anomaly_report.md
-        echo "Please refer to \`anomaly_report.csv\` for anomaly details." >> anomaly_report.md
-        echo "" >> anomaly_report.md
-        
+        # If report exists, assume anomalies were found and re-run detect.py to update it
+        if [ -f anomaly_report.md ]; then
+          echo "Anomalies detected at $(date)" >> anomaly_report.md
+          echo "" >> anomaly_report.md
+          python detect.py >> anomaly_report.md
+        fi
+
         # Check if anomaly_report.md has been modified during this run
         if [ "$LAST_MODIFIED_TIME" -lt "$CURRENT_TIME" ]; then
           echo "❗ Anomalies detected — Failing build"
