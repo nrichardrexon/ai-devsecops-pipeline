@@ -23,9 +23,17 @@ jobs:
           python-version: '3.9'
 
       - name: 📦 Install dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies from requirements.txt
         run: |
           python -m pip install --upgrade pip
-          pip install flask
+          pip install -r requirements.txt || pip install flask
 
       - name: 🚨 Scan with Trivy (Docker & Code Vulnerabilities)
         uses: aquasecurity/trivy-action@master

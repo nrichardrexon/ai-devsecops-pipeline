@@ -18,6 +18,14 @@ jobs:
       with:
         python-version: '3.10'
 
+    - name: 📦 Cache Python Dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: 📦 Install Dependencies
       run: |
         cd app
@@ -25,7 +33,7 @@ jobs:
 
     - name: 🔍 Auto-Fix Outdated Packages
       run: |
-        python auto_fix.py
+        python auto_fix.py || { echo "Error: Auto-fix failed"; exit 1; }
 
     - name: 🚨 Show Updated requirements.txt
       run: |
@@ -37,10 +45,16 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         BRANCH_NAME=auto-fix-${{ github.run_id }}
-        git checkout -b $BRANCH_NAME
-        git add app/requirements.txt
-        git commit -m "🔧 Auto-fixed outdated packages [CI Auto-Fix]" || echo "No changes to commit"
-        git push origin $BRANCH_NAME
+        git fetch origin
+        git checkout -b $BRANCH_NAME || git checkout $BRANCH_NAME
+        # Commit only if there are changes to avoid unnecessary commits
+        if ! git diff --exit-code app/requirements.txt; then
+          git add app/requirements.txt
+          git commit -m "🔧 Auto-fixed outdated packages [CI Auto-Fix]"
+          git push origin $BRANCH_NAME
+        else
+          echo "No changes to commit."
+        fi
 
     - name: 📬 Create Pull Request
       uses: peter-evans/create-pull-request@v5
@@ -51,5 +65,7 @@ jobs:
           This PR was automatically created by the DevSecOps pipeline.
           It contains updates to outdated dependencies found during security checks.
         branch: auto-fix-${{ github.run_id }}
-        base: main   # ✅ Added base branch to prevent PR error
+        base: main
         commit-message: "[CI Auto-Fix] Updated requirements.txt"
+        labels: auto-fix, dependencies
+        assignees: team-member  # Replace 'team-member' with your specific assignee

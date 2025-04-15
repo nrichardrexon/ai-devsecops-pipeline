@@ -1,5 +1,8 @@
 [allowlist]
 description = "Skip known false positives"
+# Example: allowlist certain file paths, commits, or regexes
+# paths = ["tests/", "docs/"]
+# regexes = ["dummy_key_123"]
 
 [[rules]]
 description = "AWS Access Key"
@@ -7,6 +10,47 @@ regex = '''AKIA[0-9A-Z]{16}'''
 tags = ["key", "AWS"]
 
 [[rules]]
+description = "AWS Secret Access Key"
+regex = '''(?i)aws(.{0,20})?(secret)?(.{0,20})?['"][0-9a-zA-Z/+]{40}['"]'''
+tags = ["key", "AWS"]
+
+[[rules]]
 description = "Generic API Key"
-regex = '''(?i)(api_key|apikey|secret)[\s:=]+["']?[a-z0-9_\-]{16,}["']?'''
+regex = '''(?i)(api[_-]?key|secret)[\s:=]+["']?[a-z0-9_\-]{16,}["']?'''
 tags = ["key", "API"]
+
+[[rules]]
+description = "Slack Token"
+regex = '''xox[baprs]-([0-9a-zA-Z]{10,48})'''
+tags = ["key", "Slack"]
+
+[[rules]]
+description = "GitHub Personal Access Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+tags = ["key", "GitHub"]
+
+[[rules]]
+description = "Private RSA Key"
+regex = '''-----BEGIN RSA PRIVATE KEY-----'''
+tags = ["key", "private", "RSA"]
+
+[[rules]]
+description = "Google API Key"
+regex = '''AIza[0-9A-Za-z\\-_]{35}'''
+tags = ["key", "Google"]
+
+[[rules]]
+description = "Heroku API Key"
+regex = '''(?i)heroku[_-]?api[_-]?key['"]?\s*[:=]\s*['"][0-9a-f]{32}['"]'''
+tags = ["key", "Heroku"]
+
+[[rules]]
+description = "MongoDB Connection URI"
+regex = '''mongodb(\+srv)?:\/\/[^:]+:[^@]+@[^ "]+'''
+tags = ["key", "MongoDB", "DB"]
+
+[[rules]]
+description = "Stripe Secret Key"
+regex = '''sk_live_[0-9a-zA-Z]{24}'''
+tags = ["key", "Stripe"]
+

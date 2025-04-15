@@ -8,41 +8,80 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
+    name: 🔐 Security & Anomaly Analysis
 
     steps:
-    - name: ⬇️ Checkout repo
-      uses: actions/checkout@v3
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: 🔍 Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      with:
-        config-path: .gitleaks.toml  # or .gitleaks.yml
-      env:
-        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+      - name: 🔍 Run Gitleaks Secret Scan
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
-    - name: 🐍 Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: 🐍 Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
-    - name: 📦 Install Python dependencies
-      run: |
-        pip install pandas scikit-learn
+      - name: 📦 Install Python Dependencies
+        run: |
+          echo "Installing required Python packages..."
+          pip install --no-cache-dir pandas scikit-learn bandit pylint
 
-    - name: 🚀 Run Anomaly Detection
-      run: python detect.py
+      - name: 🔐 Run Bandit Security Linter
+        run: |
+          echo "Running Bandit security linter..."
+          bandit -r . -f json -o bandit_report.json || true
 
-    - name: 📄 Upload anomaly report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: anomaly-report
-        path: anomaly_report.md
+      - name: 🧠 Run Pylint Static Code Analysis
+        run: |
+          echo "Running Pylint..."
+          pylint $(find . -name "*.py") > pylint_report.txt || true
 
-    - name: ❌ Fail if anomaly_report.md exists
-      if: always()
-      run: |
-        if [ -f anomaly_report.md ]; then
-          echo "Anomalies detected — Failing build"
-          exit 1
-        fi
+      - name: 🚀 Run Anomaly Detection
+        run: |
+          echo "Running anomaly detection..."
+          python detect.py
+
+      - name: 📤 Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            anomaly_report.md
+            bandit_report.json
+            pylint_report.txt
+
+      - name: ❌ Fail Build if Anomalies Found
+        if: always()
+        run: |
+          echo "Checking for anomaly report..."
+          if [ -f anomaly_report.md ]; then
+            echo "🚨 Anomalies detected — failing build."
+            exit 1
+          fi
+
+      - name: ❌ Fail Build if Bandit Finds Issues
+        if: always()
+        run: |
+          echo "Checking Bandit results..."
+          if grep -q '"issue_severity":' bandit_report.json; then
+            echo "🚨 Security issues found by Bandit!"
+            exit 1
+          fi
+
+      - name: ❌ Fail Build if Pylint Score is Low
+        if: always()
+        run: |
+          echo "Checking Pylint score..."
+          SCORE=$(tail -n 2 pylint_report.txt | grep -oP '[0-9.]+(?=/10)')
+          if (( $(echo "$SCORE < 8.0" | bc -l) )); then
+            echo "🚨 Pylint score ($SCORE/10) is too low!"
+            exit 1
+          else
+            echo "✅ Pylint score is acceptable ($SCORE/10)."
+          fi
