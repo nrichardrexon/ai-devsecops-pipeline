@@ -8,6 +8,10 @@ df = pd.read_csv('mock_pipeline_data.csv')
 # Step 2: Drop non-numeric columns
 df_cleaned = df.select_dtypes(include=['float64', 'int64'])
 
+# Optional: Warn if nothing to work with
+if df_cleaned.empty:
+    raise ValueError("No numeric columns found in dataset to perform anomaly detection.")
+
 # Step 3: Fit Isolation Forest
 model = IsolationForest(n_estimators=100, contamination=0.1, random_state=42)
 model.fit(df_cleaned)
@@ -21,6 +25,7 @@ print(df[df['anomaly'] == -1])
 
 # Step 6: Filter anomalies
 anomalies = df[df['anomaly'] == -1]
+print(f"\n🧪 Total anomalies found: {len(anomalies)}")
 
 # Step 7: Save report
 if not anomalies.empty:
