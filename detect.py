@@ -27,30 +27,26 @@ if not anomalies.empty:
     try:
         from prettytable import PrettyTable
 
-        # Create a PrettyTable instance
         table = PrettyTable()
-
-        # Set the field names (columns) for the table
         table.field_names = anomalies.columns.tolist()
-
-        # Add rows to the table
-        for index, row in anomalies.iterrows():
+        for _, row in anomalies.iterrows():
             table.add_row(row.tolist())
 
-        # Write the report to the markdown file
         with open("anomaly_report.md", "w") as f:
             f.write("# Anomaly Report\n\n")
-            f.write("### Anomalies detected:\n\n")
-            f.write(str(table))  # Add the table as a string
+            f.write("### Anomalies Detected:\n\n")
+            f.write("```\n")
+            f.write(str(table))
+            f.write("\n```\n")
 
         print("\n📄 Anomaly Report saved to 'anomaly_report.md'")
 
-    except ImportError:
-        print("\n⚠️ 'prettytable' not found. Saving CSV and fallback markdown.")
+    except Exception as e:
+        print(f"\n⚠️ Error using prettytable: {e}")
         anomalies.to_csv("anomaly_report.csv", index=False)
         with open("anomaly_report.md", "w") as f:
             f.write("# Anomaly Report\n\n")
-            f.write("⚠️ The `prettytable` module is missing.\n\n")
+            f.write("⚠️ Failed to use `prettytable`.\n\n")
             f.write("Please refer to `anomaly_report.csv` for anomaly details.")
 else:
     print("\n✅ No anomalies detected.")
