@@ -31,11 +31,35 @@ jobs:
         python detect.py
         echo "📂 Current files:"
         ls -la
-        echo "🔎 Checking for anomaly report..."
-        if [ -s anomaly_report.md ]; then
+        echo "🔎 Anomaly detection complete."
+
+    - name: 🕒 Get last modified time of anomaly_report.md
+      id: get_modified_time
+      run: |
+        if [ -f anomaly_report.md ]; then
+          LAST_MODIFIED_TIME=$(stat --format=%Y anomaly_report.md)
+          echo "LAST_MODIFIED_TIME=$LAST_MODIFIED_TIME" >> $GITHUB_ENV
+        else
+          echo "LAST_MODIFIED_TIME=0" >> $GITHUB_ENV
+        fi
+
+    - name: 🕒 Get current time
+      id: get_current_time
+      run: |
+        CURRENT_TIME=$(date +%s)
+        echo "CURRENT_TIME=$CURRENT_TIME" >> $GITHUB_ENV
+
+    - name: 📝 Append to anomaly_report.md and check for anomalies
+      run: |
+        # Append new anomalies to the report
+        echo "Anomalies detected at $(date)" >> anomaly_report.md
+        echo "Details: $(python detect.py)" >> anomaly_report.md
+        
+        # Check if anomaly_report.md has been modified during this run
+        if [ "$LAST_MODIFIED_TIME" -lt "$CURRENT_TIME" ]; then
           echo "❗ Anomalies detected — Failing build"
           cat anomaly_report.md
           exit 1
         else
-          echo "✅ No anomalies found or report is empty"
+          echo "✅ No new anomalies detected."
         fi
