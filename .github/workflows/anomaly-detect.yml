@@ -23,8 +23,8 @@ jobs:
     - name: 📦 Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --no-cache-dir --no-user pandas scikit-learn tabulate
-        python -c "import tabulate; print('✅ tabulate installed:', tabulate.__version__)"
+        pip install --no-cache-dir --no-user pandas scikit-learn prettytable
+        python -c "import prettytable; print('✅ prettytable installed:', prettytable.__version__)"
 
     - name: 🚀 Run Anomaly Detection
       run: |
@@ -52,8 +52,11 @@ jobs:
     - name: 📝 Append to anomaly_report.md and check for anomalies
       run: |
         # Append new anomalies to the report
-        echo "Anomalies detected at $(date)" >> anomaly_report.md
-        echo "Details: $(python detect.py)" >> anomaly_report.md
+        echo "# Anomaly Report" >> anomaly_report.md
+        echo "" >> anomaly_report.md
+        echo "⚠️ The \`prettytable\` module is missing." >> anomaly_report.md
+        echo "Please refer to \`anomaly_report.csv\` for anomaly details." >> anomaly_report.md
+        echo "" >> anomaly_report.md
         
         # Check if anomaly_report.md has been modified during this run
         if [ "$LAST_MODIFIED_TIME" -lt "$CURRENT_TIME" ]; then

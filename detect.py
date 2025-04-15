@@ -25,17 +25,32 @@ anomalies = df[df['anomaly'] == -1]
 # Step 7: Save report
 if not anomalies.empty:
     try:
-        from tabulate import tabulate
+        from prettytable import PrettyTable
+
+        # Create a PrettyTable instance
+        table = PrettyTable()
+
+        # Set the field names (columns) for the table
+        table.field_names = anomalies.columns.tolist()
+
+        # Add rows to the table
+        for index, row in anomalies.iterrows():
+            table.add_row(row.tolist())
+
+        # Write the report to the markdown file
         with open("anomaly_report.md", "w") as f:
             f.write("# Anomaly Report\n\n")
-            f.write(tabulate(anomalies, headers="keys", tablefmt="github"))
+            f.write("### Anomalies detected:\n\n")
+            f.write(str(table))  # Add the table as a string
+
         print("\n📄 Anomaly Report saved to 'anomaly_report.md'")
+
     except ImportError:
-        print("\n⚠️ 'tabulate' not found. Saving CSV and fallback markdown.")
+        print("\n⚠️ 'prettytable' not found. Saving CSV and fallback markdown.")
         anomalies.to_csv("anomaly_report.csv", index=False)
         with open("anomaly_report.md", "w") as f:
             f.write("# Anomaly Report\n\n")
-            f.write("⚠️ The `tabulate` module is missing.\n\n")
+            f.write("⚠️ The `prettytable` module is missing.\n\n")
             f.write("Please refer to `anomaly_report.csv` for anomaly details.")
 else:
     print("\n✅ No anomalies detected.")
