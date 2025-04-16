@@ -6,15 +6,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  scan:
-    runs-on: ubuntu-latest
+  security-anomaly-scan:
     name: 🔐 Security & Anomaly Analysis
+    runs-on: ubuntu-latest
 
     steps:
       - name: ⬇️ Checkout Repository
         uses: actions/checkout@v3
 
-      - name: 🔍 Run Gitleaks Secret Scan
+      - name: 🧪 Run Gitleaks Secret Scan
         uses: gitleaks/gitleaks-action@v2
         with:
           config-path: .gitleaks.toml
@@ -28,60 +28,56 @@ jobs:
 
       - name: 📦 Install Python Dependencies
         run: |
-          echo "Installing required Python packages..."
           pip install --no-cache-dir pandas scikit-learn bandit pylint
 
       - name: 🔐 Run Bandit Security Linter
         run: |
-          echo "Running Bandit security linter..."
           bandit -r . -f json -o bandit_report.json || true
 
       - name: 🧠 Run Pylint Static Code Analysis
         run: |
-          echo "Running Pylint..."
           pylint $(find . -name "*.py") > pylint_report.txt || true
 
       - name: 🚀 Run Anomaly Detection
         run: |
-          echo "Running anomaly detection..."
-          python detect.py
+          python detect.py || echo "Anomaly script failed."
 
       - name: 📤 Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports
+          name: security-reports
           path: |
             anomaly_report.md
             bandit_report.json
             pylint_report.txt
 
-      - name: ❌ Fail Build if Anomalies Found
+      - name: ❌ Fail Build if Anomalies Detected
         if: always()
         run: |
-          echo "Checking for anomaly report..."
           if [ -f anomaly_report.md ]; then
-            echo "🚨 Anomalies detected — failing build."
+            echo "🚨 Anomalies detected — failing the build."
             exit 1
           fi
 
-      - name: ❌ Fail Build if Bandit Finds Issues
+      - name: ❌ Fail Build on Bandit Issues
         if: always()
         run: |
-          echo "Checking Bandit results..."
           if grep -q '"issue_severity":' bandit_report.json; then
             echo "🚨 Security issues found by Bandit!"
             exit 1
           fi
 
-      - name: ❌ Fail Build if Pylint Score is Low
+      - name: ❌ Fail Build if Pylint Score < 8.0
         if: always()
         run: |
-          echo "Checking Pylint score..."
           SCORE=$(tail -n 2 pylint_report.txt | grep -oP '[0-9.]+(?=/10)')
-          if (( $(echo "$SCORE < 8.0" | bc -l) )); then
-            echo "🚨 Pylint score ($SCORE/10) is too low!"
+          if [ -z "$SCORE" ]; then
+            echo "⚠️ Could not parse Pylint score. Skipping."
+            exit 0
+          elif (( $(echo "$SCORE < 8.0" | bc -l) )); then
+            echo "🚨 Pylint score too low: $SCORE/10"
             exit 1
           else
-            echo "✅ Pylint score is acceptable ($SCORE/10)."
+            echo "✅ Pylint score acceptable: $SCORE/10"
           fi

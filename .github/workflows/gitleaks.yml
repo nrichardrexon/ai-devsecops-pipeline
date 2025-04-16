@@ -1,20 +1,21 @@
-name: 🔐 Gitleaks Secret Scan + Auto Issue
+name: 🔐 Gitleaks Secret Scan + Auto-Issue
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   gitleaks-scan:
-    name: Run Gitleaks Secret Scan
+    name: 🔍 Run Gitleaks Secret Scan
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v3
 
-      - name: 🕵️‍♂️ Run Gitleaks Scan
+      - name: 🕵️ Run Gitleaks Scan
         uses: zricethezav/gitleaks-action@v2
         with:
           args: detect --report-format json --report-path=gitleaks_report.json --exit-code 0
@@ -27,24 +28,25 @@ jobs:
 
       - name: 🚨 Create GitHub Issue if Secrets Found
         run: |
-          echo "🔍 Checking for secrets in gitleaks_report.json..."
+          echo "🔍 Parsing gitleaks_report.json for secrets..."
           
           if jq -e '.[]?' gitleaks_report.json > /dev/null; then
-            echo "🚨 Secrets found!"
+            echo "🚨 Secrets found! Creating GitHub issue..."
 
-            echo "🔧 Installing GitHub CLI if not available..."
-            if ! command -v gh &> /dev/null; then
-              sudo apt-get update && sudo apt-get install -y gh
+            # Install GitHub CLI if missing
+            if ! command -v gh &>/dev/null; then
+              sudo apt-get update -y
+              sudo apt-get install -y gh
             fi
 
-            echo "📝 Creating GitHub issue..."
-            ISSUE_BODY=$(jq -r '.[] | "• **File**: \(.File)\n  **Secret**: \(.Secret | tostring | .[0:10] + "...")\n  **Rule**: \(.RuleID)\n---"' gitleaks_report.json | head -n 60)
+            ISSUE_BODY=$(jq -r '.[] | "• **File**: \(.File)\n  **Secret Snippet**: \(.Secret | tostring | .[0:10])...\n  **Rule**: \(.RuleID)\n---"' gitleaks_report.json | head -n 60)
 
             gh issue create \
-              --title "🚨 Secrets detected by Gitleaks" \
-              --body "$ISSUE_BODY"
+              --title "🚨 Gitleaks: Secrets Detected in Commit" \
+              --body "$ISSUE_BODY" \
+              --label "security, secret-scan"
           else
-            echo "✅ No secrets found. Great job!"
+            echo "✅ No secrets detected. All clear!"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

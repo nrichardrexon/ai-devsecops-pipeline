@@ -1,0 +1,182 @@
+.
+├── .github
+│   ├── gitleaks.toml
+│   └── workflows
+│       ├── anomaly-detect.yml
+│       ├── ci-devsecops.yml
+│       ├── devsecops.yml
+│       ├── gitleaks.yml
+│       └── security-check.yml
+├── .gitignore
+├── LICENSE
+├── README.md
+├── ai-devsecops-pipeline.git
+│   ├── HEAD
+│   ├── config
+│   ├── description
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   ├── sendemail-validate.sample
+│   │   └── update.sample
+│   ├── info
+│   │   ├── exclude
+│   │   └── refs
+│   ├── objects
+│   │   ├── 00
+│   │   │   └── 2307ead9943f3c39639eb4debffec8f0f1b1de
+│   │   ├── 04
+│   │   │   └── 9d45e5b7c47e95e8d274ac165a48a4e0aefbf7
+│   │   ├── 0d
+│   │   │   └── 6cd184cc1ebac218526fe9c0c81c14fb79ad71
+│   │   ├── 10
+│   │   │   └── 7dc4791d26f59f5a77d5ba9382151db08ee79a
+│   │   ├── 11
+│   │   │   └── 1d7fb9c15211fc842e5056227a56c3db08d54d
+│   │   ├── 16
+│   │   │   └── 361fbd0f9c2655a203abdd2cdd717b58ef6458
+│   │   ├── 19
+│   │   │   ├── ceb34eebc4cd08191b9376b2356a5c9c89d04c
+│   │   │   └── fe447084957722747a1fb15ce0b9e02ea5ecc3
+│   │   ├── 1b
+│   │   │   └── ad88e0130a1a0437747ad8b86dfdd9f15a44be
+│   │   ├── 20
+│   │   │   └── 825e4010abbe936dfcdcd9d3092bb4fcc5abc0
+│   │   ├── 21
+│   │   │   └── 60efd3f84625624844ea53d82e83f8e0426d90
+│   │   ├── 28
+│   │   │   └── aa43e5490376b1d297452c66fd6cd6fc0e6e44
+│   │   ├── 33
+│   │   │   └── d64f144c1713776609c4157d74b830510c2565
+│   │   ├── 35
+│   │   │   └── be7bce4322be41011049a289a9e7dc2c314469
+│   │   ├── 39
+│   │   │   └── de6f0d521856c093a94b82380e3a4bbdb4f19a
+│   │   ├── 3d
+│   │   │   └── 3a369173475edec76f3dbbc447ffa7813c626f
+│   │   ├── 46
+│   │   │   └── b5eadbfe3141728dc541e1b136334d8fa0b054
+│   │   ├── 4f
+│   │   │   └── 71700f637fc43ea75f84369fc66d75a935cfb0
+│   │   ├── 54
+│   │   │   ├── 6441760bbb989010b754cf6bd96266bbac485b
+│   │   │   └── 85fce04eaffc07e76b4ca563bfbd44f6364698
+│   │   ├── 55
+│   │   │   └── 455548fe7aea2c13cbc5a40e081ca22f7b4580
+│   │   ├── 58
+│   │   │   ├── 4c37a6f783e25704ed7ccdcccadcf9b81c871c
+│   │   │   └── f98bdf2dd0f59b0f5da9a0f07942cb6f027eec
+│   │   ├── 5e
+│   │   │   └── 252137e7d886afeb986c26c6f3f49bb049b3a3
+│   │   ├── 66
+│   │   │   └── e563fe74de3e02319ab2c79216c4a64552ba34
+│   │   ├── 67
+│   │   │   └── a900e007f7949bf1739ba541b357017091ce3e
+│   │   ├── 75
+│   │   │   └── 9e6e281942d8e0237d90d9007b1a2466dc2898
+│   │   ├── 7b
+│   │   │   └── 46be7f0b6b0c05765a8870857e8a0995145188
+│   │   ├── 7d
+│   │   │   └── 70645b47afd3be8416065e0e874b1762b76ed1
+│   │   ├── 7f
+│   │   │   └── 8a8de054244aea684b9f0d5cea7e1741922955
+│   │   ├── 8d
+│   │   │   └── 2ffa72a4bd8c884befef154029e3ea4cb2fcd6
+│   │   ├── 93
+│   │   │   └── 387d7a4f6acbc37f8fa51feede8af8ea84baa8
+│   │   ├── 9a
+│   │   │   └── 788701ec9a5a2242a8fda99d9fdd9cbcdd96be
+│   │   ├── 9f
+│   │   │   └── f657fa41a4e53e8cbaad4e8dcb5c63e422e16d
+│   │   ├── a5
+│   │   │   └── abb88dd1cd9f39f98dcc700ceb5427474dacf5
+│   │   ├── ae
+│   │   │   └── 019625d724c119fd614a459a197d37d74e4e7f
+│   │   ├── b4
+│   │   │   └── 679eaf4df01fc8fe01cd59900ca6dd25653752
+│   │   ├── b5
+│   │   │   ├── 9e446d0ee578af1a57b500b96da2a3fcb1edbd
+│   │   │   └── ede18eeb394423e1863ebf2f522a89398aaf05
+│   │   ├── bd
+│   │   │   └── e65608a6dbc756bb4755c34c5c1d2b08ec3fdb
+│   │   ├── bf
+│   │   │   └── 9e16514e277bd549df1da2732789b16d4d14a4
+│   │   ├── c5
+│   │   │   └── b64a2b67f51239d71205e2241c18ae3ab6570f
+│   │   ├── c7
+│   │   │   └── d05559b4ab65949d17653b8d5829747b12712f
+│   │   ├── cb
+│   │   │   └── 2559f967b9dbee60db79239150c0db9f2770f5
+│   │   ├── cd
+│   │   │   └── b1409a256ae5b60bc48614188d7e02ecc5ab10
+│   │   ├── d1
+│   │   │   └── 2ee8faec381dad15e56ef69cd9b8ddd3e1b126
+│   │   ├── d3
+│   │   │   └── 9e62be40f3928ec422d3ce0b376e894b2e1f8f
+│   │   ├── d5
+│   │   │   └── c12f9eacc210a5ae3b0838f305830815fdc536
+│   │   ├── e5
+│   │   │   └── 11831a0321f5d20b9818b2f910e1e715b8361a
+│   │   ├── e6
+│   │   │   └── 8eb6725ad545ccf47386c35141716ffe537325
+│   │   ├── ee
+│   │   │   └── 641f66c47765c3dc004d776fddee6f809240cb
+│   │   ├── ef
+│   │   │   └── c0b4612230ffa79d682ed9053fbef88b3e72ac
+│   │   ├── f2
+│   │   │   └── 6ab4ff148144e0b26b84d6cdb1b69315345aa1
+│   │   ├── fb
+│   │   │   └── 2bdac19cafdd3f7fc7bdbc0a103abbfc4c9c2d
+│   │   ├── ff
+│   │   │   ├── 6883b05a048ca31e829879a1d80d4ac8587769
+│   │   │   └── c16acb86933215b093ce0e7fa833435a425213
+│   │   ├── info
+│   │   │   ├── commit-graph
+│   │   │   └── packs
+│   │   └── pack
+│   │       ├── pack-e2601ae13de01bdd7e455f87e2c5eefed7e3ee7e.bitmap
+│   │       ├── pack-e2601ae13de01bdd7e455f87e2c5eefed7e3ee7e.idx
+│   │       ├── pack-e2601ae13de01bdd7e455f87e2c5eefed7e3ee7e.pack
+│   │       └── pack-e2601ae13de01bdd7e455f87e2c5eefed7e3ee7e.rev
+│   ├── packed-refs
+│   └── refs
+│       └── heads
+│           └── main
+├── ai-devsecops-pipeline.git.bfg-report
+│   └── 2025-04-06
+│       └── 13-32-25
+│           ├── cache-stats.txt
+│           ├── deleted-files.txt
+│           ├── object-id-map.old-new.txt
+│           └── protected-dirt
+│               └── 47822c5e-HEAD.csv
+├── anomaly_report.csv
+├── app
+│   ├── .dockerignore
+│   ├── Dockerfile
+│   ├── app.py
+│   └── requirements.txt
+├── auto_fix.py
+├── bfg.jar
+├── detect.py
+├── gitleaks.tar.gz
+├── gitleaks_report.json
+├── logs
+│   └── sample_logs.txt
+├── mock_pipeline_data.csv
+├── parse_gitleaks.py
+├── parse_trivy_report.py
+├── replacements.txt
+└── trivy_report.json
+
+67 directories, 112 files

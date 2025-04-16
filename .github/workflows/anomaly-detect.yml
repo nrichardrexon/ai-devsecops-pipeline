@@ -8,78 +8,61 @@ on:
   workflow_dispatch:
 
 jobs:
-  anomaly-scan:
+  anomaly-detection:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ⬇️ Checkout code
-      uses: actions/checkout@v3
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v3
 
-    - name: 🐍 Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: 🐍 Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
-    - name: 📦 Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt  # Install from requirements.txt instead
-        python -c "import prettytable; print('✅ prettytable installed:', prettytable.__version__)"
+      - name: 📦 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -c "import prettytable; print('✅ prettytable installed:', prettytable.__version__)"
 
-    - name: 🚀 Run Anomaly Detection
-      run: |
-        echo "🔎 Starting anomaly detection..."
-        if python detect.py; then
-          echo "✅ Anomaly detection complete successfully."
-        else
-          echo "❌ Error: Anomaly detection failed!" >&2
-          exit 1
-        fi
-        echo "📂 Current files:"
-        ls -la
-        echo "🔎 Anomaly detection complete."
+      - name: 🚀 Run Anomaly Detection Script
+        run: |
+          echo "🔎 Running anomaly detection..."
+          python detect.py || { echo '❌ Anomaly detection script failed!' >&2; exit 1; }
 
-    - name: 🕒 Get last modified time of anomaly_report.md
-      id: get_modified_time
-      run: |
-        if [ ! -f anomaly_report.md ]; then
-          echo "Anomaly Report" > anomaly_report.md
-          echo "=================" >> anomaly_report.md
-          echo "Generated at $(date)" >> anomaly_report.md
-        fi
+      - name: 📄 Ensure anomaly_report.md exists
+        run: |
+          if [ ! -f anomaly_report.md ]; then
+            echo "Anomaly Report" > anomaly_report.md
+            echo "=================" >> anomaly_report.md
+          fi
 
-        LAST_MODIFIED_TIME=$(stat --format=%Y anomaly_report.md)
-        echo "LAST_MODIFIED_TIME=$LAST_MODIFIED_TIME" >> $GITHUB_ENV
+      - name: 🕒 Capture timestamps
+        id: timestamps
+        run: |
+          echo "LAST_MODIFIED=$(stat --format=%Y anomaly_report.md || echo 0)" >> $GITHUB_ENV
+          echo "CURRENT_TIME=$(date +%s)" >> $GITHUB_ENV
 
-    - name: 🕒 Get current time
-      id: get_current_time
-      run: |
-        CURRENT_TIME=$(date +%s)
-        echo "CURRENT_TIME=$CURRENT_TIME" >> $GITHUB_ENV
-
-    - name: 📝 Append to anomaly_report.md and check for anomalies
-      run: |
-        # Append anomaly detection output with timestamp
-        if [ -f anomaly_report.md ]; then
+      - name: 📝 Append anomalies and fail on detection
+        run: |
           echo "Anomalies detected at $(date)" >> anomaly_report.md
           echo "-----------------------------" >> anomaly_report.md
-          if ! python detect.py >> anomaly_report.md; then
-            echo "❌ Error: Anomaly detection failed again!" >&2
+          python detect.py >> anomaly_report.md || {
+            echo "❌ Anomaly detection failed again!" >&2
             exit 1
+          }
+
+          if [ "$LAST_MODIFIED" -lt "$CURRENT_TIME" ]; then
+            echo "❗ Anomalies detected — failing the pipeline"
+            cat anomaly_report.md
+            exit 1
+          else
+            echo "✅ No new anomalies found"
           fi
-        fi
 
-        # Check if anomaly_report.md has been modified during this run
-        if [ "$LAST_MODIFIED_TIME" -lt "$CURRENT_TIME" ]; then
-          echo "❗ Anomalies detected — Failing build"
+      - name: 🧾 Show anomaly report
+        if: always()
+        run: |
+          echo "📝 Final Report:"
           cat anomaly_report.md
-          exit 1
-        else
-          echo "✅ No new anomalies detected."
-        fi
-
-    - name: 🔍 Log additional info
-      run: |
-        echo "📝 Logs and detailed output:"
-        cat anomaly_report.md
-        echo "🔎 End of logs."
