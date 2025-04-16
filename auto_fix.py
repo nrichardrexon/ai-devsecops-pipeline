@@ -19,7 +19,7 @@ def get_outdated_packages():
     
     return outdated
 
-def update_requirements(requirements_path='app/requirements.txt'):
+def update_requirements(requirements_path='requirements.txt'):
     with open(requirements_path, 'r') as file:
         lines = file.readlines()
 
