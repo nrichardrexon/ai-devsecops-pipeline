@@ -33,7 +33,7 @@ jobs:
       - name: 📦 Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r app/requirements.txt
 
       - name: 🐋 Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@master
@@ -62,13 +62,21 @@ jobs:
 
       - name: 🚨 Run Bandit Scan
         run: |
-          bandit -r app/ -f json -o bandit-report.json || true
+          mkdir -p reports
+          bandit -r app/ -f json -o reports/bandit-report.json || true
+
+      - name: ⛔ Fail if Bandit finds issues
+        run: |
+          if [ -f reports/bandit-report.json ] && grep -q '"issue_severity":' reports/bandit-report.json; then
+            echo "🚨 Security issues found by Bandit!"
+            exit 1
+          fi
 
       - name: 📤 Upload Bandit Report
         uses: actions/upload-artifact@v4
         with:
           name: bandit-report
-          path: bandit-report.json
+          path: reports/bandit-report.json
 
   gitleaks-scan:
     name: 🔐 Secrets Scan (Gitleaks)
@@ -112,7 +120,7 @@ jobs:
       - name: 🔧 Build for CodeQL
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r app/requirements.txt
 
       - name: 🔍 Analyze with CodeQL
         uses: github/codeql-action/analyze@v2
