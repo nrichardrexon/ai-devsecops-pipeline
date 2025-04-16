@@ -23,7 +23,7 @@ jobs:
       - name: 📦 Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r app/requirements.txt
           python -c "import prettytable; print('✅ prettytable installed:', prettytable.__version__)"
 
       - name: 🚀 Run Anomaly Detection Script
@@ -62,7 +62,12 @@ jobs:
           fi
 
       - name: 🧾 Show anomaly report
-        if: always()
+      
         run: |
           echo "📝 Final Report:"
-          cat anomaly_report.md
+          if [ -f anomaly_report.md ]; then
+            cat anomaly_report.md
+          else
+            echo "No anomaly report found. ✅"
+          fi
+    
