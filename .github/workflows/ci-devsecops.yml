@@ -65,11 +65,18 @@ jobs:
           mkdir -p reports
           bandit -r app/ -f json -o reports/bandit-report.json || true
 
+      - name: 📄 Debug Bandit Report
+        run: |
+          echo "📄 Bandit JSON Report:"
+          cat reports/bandit-report.json
+
       - name: ⛔ Fail if Bandit finds issues
         run: |
           if [ -f reports/bandit-report.json ] && grep -q '"issue_severity":' reports/bandit-report.json; then
             echo "🚨 Security issues found by Bandit!"
             exit 1
+          else
+            echo "✅ No critical issues found by Bandit."
           fi
 
       - name: 📤 Upload Bandit Report
