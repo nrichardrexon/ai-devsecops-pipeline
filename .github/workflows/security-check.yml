@@ -14,13 +14,6 @@ jobs:
       - name: ⬇️ Checkout Repository
         uses: actions/checkout@v3
 
-      - name: 🧪 Run Gitleaks Secret Scan
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          config-path: .gitleaks.toml
-        env:
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
       - name: 🐍 Set up Python 3.12
         uses: actions/setup-python@v4
         with:
@@ -30,32 +23,56 @@ jobs:
         run: |
           pip install --no-cache-dir pandas scikit-learn bandit pylint
 
+      - name: 🧪 Run Gitleaks Secret Scan
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      - name: 📁 Create reports folder
+        run: mkdir -p reports
+
       - name: 🔐 Run Bandit Security Linter
         run: |
-          bandit -r . -f json -o bandit_report.json || true
+          bandit -r . -f json -o reports/bandit_report.json || true
 
       - name: 🧠 Run Pylint Static Code Analysis
         run: |
-          pylint $(find . -name "*.py") > pylint_report.txt || true
+          pylint $(find . -name "*.py") > reports/pylint_report.txt || true
 
       - name: 🚀 Run Anomaly Detection
         run: |
           python detect.py || echo "Anomaly script failed."
+
+      - name: 📝 Move Anomaly Report
+        run: |
+          if [ -f anomaly_report.md ]; then
+            mv anomaly_report.md reports/anomaly_report.md
+          fi
 
       - name: 📤 Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: security-reports
-          path: |
-            anomaly_report.md
-            bandit_report.json
-            pylint_report.txt
+          path: reports/
+
+      - name: 💾 Commit Reports to Repository
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+          git checkout main
+          git add reports/*
+          git commit -m "📄 Add security and anomaly reports [CI]" || echo "No changes to commit."
+          git push origin main || echo "Push skipped (possible conflict)."
 
       - name: ❌ Fail Build if Anomalies Detected
         if: always()
         run: |
-          if [ -f anomaly_report.md ]; then
+          if [ -f reports/anomaly_report.md ]; then
             echo "🚨 Anomalies detected — failing the build."
             exit 1
           fi
@@ -63,7 +80,7 @@ jobs:
       - name: ❌ Fail Build on Bandit Issues
         if: always()
         run: |
-          if grep -q '"issue_severity":' bandit_report.json; then
+          if grep -q '"issue_severity":' reports/bandit_report.json; then
             echo "🚨 Security issues found by Bandit!"
             exit 1
           fi
@@ -71,7 +88,7 @@ jobs:
       - name: ❌ Fail Build if Pylint Score < 8.0
         if: always()
         run: |
-          SCORE=$(tail -n 2 pylint_report.txt | grep -oP '[0-9.]+(?=/10)')
+          SCORE=$(tail -n 2 reports/pylint_report.txt | grep -oP '[0-9.]+(?=/10)')
           if [ -z "$SCORE" ]; then
             echo "⚠️ Could not parse Pylint score. Skipping."
             exit 0
