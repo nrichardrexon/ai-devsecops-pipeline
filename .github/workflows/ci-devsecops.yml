@@ -68,7 +68,14 @@ jobs:
       - name: 📄 Debug Bandit Report
         run: |
           echo "📄 Bandit JSON Report:"
-          cat reports/bandit-report.json
+          cat reports/bandit-report.json || echo "No report found"
+
+      - name: 📤 Upload Bandit Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: reports/bandit-report.json
 
       - name: ⛔ Fail if Bandit finds issues
         run: |
@@ -78,12 +85,6 @@ jobs:
           else
             echo "✅ No critical issues found by Bandit."
           fi
-
-      - name: 📤 Upload Bandit Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: bandit-report
-          path: reports/bandit-report.json
 
   gitleaks-scan:
     name: 🔐 Secrets Scan (Gitleaks)
