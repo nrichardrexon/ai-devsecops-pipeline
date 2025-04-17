@@ -83,14 +83,15 @@ jobs:
         if: always()
         run: |
           mkdir -p security-reports/bandit
-          cp reports/bandit-report.json security-reports/bandit/bandit-report-${{ github.run_id }}.json
+          timestamp=$(date +%Y-%m-%d-%H-%M-%S)
+          cp reports/bandit-report.json security-reports/bandit/bandit-report-${timestamp}.json
 
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add security-reports/bandit/bandit-report-${{ github.run_id }}.json
-          git commit -m "📄 Add Bandit report (Run ${{ github.run_id }})"
-          git push
+          git add security-reports/bandit/bandit-report-${timestamp}.json
+          git commit -m "📄 Append Bandit report ${timestamp}" || echo "No changes to commit"
+          git push || echo "Nothing to push"
 
   gitleaks-scan:
     name: 🔐 Secrets Scan (Gitleaks)
