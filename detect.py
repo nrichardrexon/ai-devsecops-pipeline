@@ -8,7 +8,7 @@ from sklearn.ensemble import IsolationForest
 
 # 🧠 CLI: Parse input file path
 parser = argparse.ArgumentParser(description="🔍 Anomaly detection using Isolation Forest")
-parser.add_argument('--data', default='mock_pipeline_data.csv', help='Path to the dataset CSV')
+parser.add_argument('--data', default='Clean Error-Free Mock Dataset.csv', help='Path to the dataset CSV')
 args = parser.parse_args()
 csv_file = args.data
 
