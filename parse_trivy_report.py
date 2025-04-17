@@ -1,12 +1,14 @@
+"""📄 Parse Trivy JSON output and convert to CSV format for anomaly detection."""
+
+from datetime import datetime
 import json
 import pandas as pd
-from datetime import datetime
 
-# Load the JSON report
-with open("trivy_report.json", "r") as file:
+# 📥 Load the JSON report
+with open("trivy_report.json", "r", encoding="utf-8") as file:
     data = json.load(file)
 
-# Prepare dataset
+# 🛠️ Prepare dataset
 records = []
 timestamp = datetime.now().isoformat()
 
@@ -21,13 +23,13 @@ for result in data.get("Results", []):
         "file_path": file_path,
         "vulnerabilities_total": total,
         "critical_vulns": critical,
-        "new_vulnerabilities": 0,  # Placeholder, for future comparison
+        "new_vulnerabilities": 0,  # Placeholder for future enhancement
         "anomaly": 1 if critical > 0 or total > 5 else 0,
     }
     records.append(record)
 
-# Save to CSV
+# 💾 Save to CSV
 df = pd.DataFrame(records)
-df.to_csv("vuln_dataset.csv", index=False)
+df.to_csv("vuln_dataset.csv", index=False, encoding="utf-8")
 
 print("✅ Dataset saved to vuln_dataset.csv")

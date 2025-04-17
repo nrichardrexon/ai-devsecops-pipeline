@@ -1,8 +1,11 @@
-import pandas as pd
-from sklearn.ensemble import IsolationForest
-from datetime import datetime
+"""🔍 Anomaly detection using Isolation Forest on a CSV dataset."""
+
 import argparse
 import os
+from datetime import datetime
+
+import pandas as pd
+from sklearn.ensemble import IsolationForest
 
 # 🧠 CLI: Parse input file path
 parser = argparse.ArgumentParser(description="🔍 Anomaly detection using Isolation Forest")
@@ -12,9 +15,9 @@ csv_file = args.data
 
 # 📥 Load dataset
 try:
-    df = pd.read_csv(csv_file)
-except FileNotFoundError:
-    raise FileNotFoundError(f"🚫 File not found: {csv_file}")
+    df = pd.read_csv(csv_file, encoding='utf-8')
+except FileNotFoundError as e:
+    raise FileNotFoundError(f"🚫 File not found: {csv_file}") from e
 
 # 🧹 Clean: Select only numeric columns
 df_cleaned = df.select_dtypes(include=['float64', 'int64'])
@@ -55,9 +58,9 @@ if not anomalies.empty:
         "```"
     ]
 
-    with open("anomaly_report.md", "w") as f:
+    with open("anomaly_report.md", "w", encoding='utf-8') as f:
         f.write("\n".join(markdown))
-    anomalies.to_csv("anomaly_report.csv", index=False)
+    anomalies.to_csv("anomaly_report.csv", index=False, encoding='utf-8')
 
     print("✅ Saved 'anomaly_report.md' and 'anomaly_report.csv'.")
 
@@ -67,15 +70,15 @@ if not anomalies.empty:
     anomalies['commit_sha'] = github_sha
     anomalies['source_file'] = csv_file
 
-    log_file = "anomaly_log.csv"
-    if os.path.exists(log_file):
-        old_log = pd.read_csv(log_file)
+    LOG_FILE = "anomaly_log.csv"
+    if os.path.exists(LOG_FILE):
+        old_log = pd.read_csv(LOG_FILE, encoding='utf-8')
         new_log = pd.concat([old_log, anomalies], ignore_index=True)
-        new_log.to_csv(log_file, index=False)
+        new_log.to_csv(LOG_FILE, index=False, encoding='utf-8')
     else:
-        anomalies.to_csv(log_file, index=False)
+        anomalies.to_csv(LOG_FILE, index=False, encoding='utf-8')
 
-    print(f"📝 Anomalies logged in '{log_file}'")
+    print(f"📝 Anomalies logged in '{LOG_FILE}'")
 
 else:
     print("✅ No anomalies detected.")

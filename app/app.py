@@ -1,14 +1,18 @@
-from flask import Flask, request, escape
-import os
+"""Flask web application for DevSecOps demo."""
+
+import os  # Standard imports first
+from flask import Flask, request, escape  # Third-party imports next
 
 app = Flask(__name__)
 
 @app.route('/')
 def hello():
+    """Return a basic greeting."""
     return "Hello from DevSecOps!"
 
 @app.route('/danger')
 def danger():
+    """Simulate execution of a user-provided command."""
     cmd = request.args.get('cmd', '')
     safe_cmd = escape(cmd)
     return f"Simulated execution: {safe_cmd}"
