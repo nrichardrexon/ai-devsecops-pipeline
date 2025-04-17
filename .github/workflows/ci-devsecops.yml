@@ -45,7 +45,7 @@ jobs:
     name: 🔐 Python Security Scan (Bandit)
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       security-events: write
 
     steps:
@@ -65,26 +65,32 @@ jobs:
           mkdir -p reports
           bandit -r app/ -f json -o reports/bandit-report.json || true
 
-      - name: 📄 Debug Bandit Report
+      - name: ⛔ Fail if Bandit finds issues
         run: |
-          echo "📄 Bandit JSON Report:"
-          cat reports/bandit-report.json || echo "No report found"
+          if [ -f reports/bandit-report.json ] && grep -q '"issue_severity":' reports/bandit-report.json; then
+            echo "🚨 Security issues found by Bandit!"
+            exit 1
+          fi
 
-      - name: 📤 Upload Bandit Report
+      - name: 📤 Upload Bandit Report as Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bandit-report
           path: reports/bandit-report.json
 
-      - name: ⛔ Fail if Bandit finds issues
+      - name: 💾 Commit Bandit Report to Repo
+        if: always()
         run: |
-          if [ -f reports/bandit-report.json ] && grep -q '"issue_severity":' reports/bandit-report.json; then
-            echo "🚨 Security issues found by Bandit!"
-            exit 1
-          else
-            echo "✅ No critical issues found by Bandit."
-          fi
+          mkdir -p security-reports/bandit
+          cp reports/bandit-report.json security-reports/bandit/bandit-report-${{ github.run_id }}.json
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add security-reports/bandit/bandit-report-${{ github.run_id }}.json
+          git commit -m "📄 Add Bandit report (Run ${{ github.run_id }})"
+          git push
 
   gitleaks-scan:
     name: 🔐 Secrets Scan (Gitleaks)
