@@ -61,8 +61,12 @@ jobs:
             echo "✅ No new anomalies found"
           fi
 
+      - name: 🩺 Run Auto-Remediation Suggestions
+        run: |
+          echo "🔧 Checking remediation suggestions..."
+          python remediate.py || echo "⚠️ Skipping remediation — no anomaly_report.csv found."
+
       - name: 🧾 Show anomaly report
-      
         run: |
           echo "📝 Final Report:"
           if [ -f anomaly_report.md ]; then
@@ -70,4 +74,3 @@ jobs:
           else
             echo "No anomaly report found. ✅"
           fi
-    
