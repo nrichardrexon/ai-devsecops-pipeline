@@ -1,6 +1,6 @@
-"""📦 Script to auto-update outdated Python packages in requirements.txt"""
+""""📦 Script to auto-update outdated Python packages in requirements.txt"""
 
-import subprocess
+import subprocess  # nosec B404 - subprocess used safely with constant arguments
 import json
 import shutil
 import sys
@@ -14,7 +14,8 @@ def get_outdated_packages():
         sys.exit(1)
 
     try:
-        result = subprocess.run(
+        # subprocess used with static, safe arguments and no shell=True
+        result = subprocess.run(  # nosec B603
             [pip_path, 'list', '--outdated', '--format=json'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

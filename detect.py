@@ -1,9 +1,8 @@
-"""🔍 Anomaly detection using Isolation Forest on a CSV dataset."""
+""""🔍 Anomaly detection using Isolation Forest on a CSV dataset."""
 
 import argparse
 import os
 from datetime import datetime
-
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 
@@ -16,8 +15,8 @@ csv_file = args.data
 # 📥 Load dataset
 try:
     df = pd.read_csv(csv_file, encoding='utf-8')
-except FileNotFoundError as e:
-    raise FileNotFoundError(f"🚫 File not found: {csv_file}") from e
+except FileNotFoundError:
+    raise FileNotFoundError(f"🚫 File not found: {csv_file}")
 
 # 🧹 Clean: Select only numeric columns
 df_cleaned = df.select_dtypes(include=['float64', 'int64'])
@@ -42,7 +41,7 @@ timestamp = datetime.utcnow().isoformat() + "Z"
 github_sha = os.getenv("GITHUB_SHA", "local-dev")
 run_id = os.getenv("GITHUB_RUN_ID", "manual-run")
 
-# 🧾 Report generation
+# 🧾 Report paths
 report_md = os.path.join(REPORTS_DIR, "anomaly_report.md")
 report_csv = os.path.join(REPORTS_DIR, "anomaly_report.csv")
 log_file = os.path.join(REPORTS_DIR, "anomaly_log.csv")
@@ -51,6 +50,7 @@ if not anomalies.empty:
     print("🚨 Anomalies detected!")
     print(anomalies)
 
+    # 📝 Markdown report
     markdown = [
         "# 🧠 Anomaly Report",
         "## 🔎 Metadata",
@@ -59,16 +59,17 @@ if not anomalies.empty:
         f"- **Run ID**: `{run_id}`",
         f"- **CSV File**: `{csv_file}`",
         f"- **Total Rows Scanned**: `{len(df)}`",
-        f"- **Anomalies Found**: `{len(anomalies)}`\n",
+        f"- **Anomalies Found**: `{len(anomalies)}`",
+        "",
         "## ⚠️ Anomalous Rows",
         "```",
         anomalies.to_string(index=False),
         "```"
     ]
-
     with open(report_md, "w", encoding='utf-8') as f:
         f.write("\n".join(markdown))
 
+    # 📄 Save anomalies CSV
     anomalies.to_csv(report_csv, index=False, encoding='utf-8')
     print(f"✅ Saved '{report_md}' and '{report_csv}'.")
 
@@ -89,6 +90,6 @@ if not anomalies.empty:
 
 else:
     print("✅ No anomalies detected.")
-    for file_name in [report_md, report_csv]:
-        if os.path.exists(file_name):
-            os.remove(file_name)
+    for file in [report_md, report_csv]:
+        if os.path.exists(file):
+            os.remove(file)
