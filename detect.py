@@ -33,12 +33,20 @@ model.fit(df_cleaned)
 df['anomaly'] = model.predict(df_cleaned)
 anomalies = df[df['anomaly'] == -1]
 
+# 📁 Ensure reports directory exists
+REPORTS_DIR = "reports"
+os.makedirs(REPORTS_DIR, exist_ok=True)
+
 # 📌 Metadata for traceability
 timestamp = datetime.utcnow().isoformat() + "Z"
 github_sha = os.getenv("GITHUB_SHA", "local-dev")
 run_id = os.getenv("GITHUB_RUN_ID", "manual-run")
 
 # 🧾 Report generation
+report_md = os.path.join(REPORTS_DIR, "anomaly_report.md")
+report_csv = os.path.join(REPORTS_DIR, "anomaly_report.csv")
+log_file = os.path.join(REPORTS_DIR, "anomaly_log.csv")
+
 if not anomalies.empty:
     print("🚨 Anomalies detected!")
     print(anomalies)
@@ -58,30 +66,29 @@ if not anomalies.empty:
         "```"
     ]
 
-    with open("anomaly_report.md", "w", encoding='utf-8') as f:
+    with open(report_md, "w", encoding='utf-8') as f:
         f.write("\n".join(markdown))
-    anomalies.to_csv("anomaly_report.csv", index=False, encoding='utf-8')
 
-    print("✅ Saved 'anomaly_report.md' and 'anomaly_report.csv'.")
+    anomalies.to_csv(report_csv, index=False, encoding='utf-8')
+    print(f"✅ Saved '{report_md}' and '{report_csv}'.")
 
-    # 📊 Append anomaly log for future comparison
+    # 📊 Append anomaly log
     anomalies['timestamp'] = timestamp
     anomalies['run_id'] = run_id
     anomalies['commit_sha'] = github_sha
     anomalies['source_file'] = csv_file
 
-    LOG_FILE = "anomaly_log.csv"
-    if os.path.exists(LOG_FILE):
-        old_log = pd.read_csv(LOG_FILE, encoding='utf-8')
+    if os.path.exists(log_file):
+        old_log = pd.read_csv(log_file, encoding='utf-8')
         new_log = pd.concat([old_log, anomalies], ignore_index=True)
-        new_log.to_csv(LOG_FILE, index=False, encoding='utf-8')
+        new_log.to_csv(log_file, index=False, encoding='utf-8')
     else:
-        anomalies.to_csv(LOG_FILE, index=False, encoding='utf-8')
+        anomalies.to_csv(log_file, index=False, encoding='utf-8')
 
-    print(f"📝 Anomalies logged in '{LOG_FILE}'")
+    print(f"📝 Anomalies logged in '{log_file}'")
 
 else:
     print("✅ No anomalies detected.")
-    for f in ["anomaly_report.md", "anomaly_report.csv"]:
-        if os.path.exists(f):
-            os.remove(f)
+    for file_name in [report_md, report_csv]:
+        if os.path.exists(file_name):
+            os.remove(file_name)
