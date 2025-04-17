@@ -45,7 +45,6 @@ run_id = os.getenv("GITHUB_RUN_ID", "manual-run")
 report_md = os.path.join(REPORTS_DIR, "anomaly_report.md")
 report_csv = os.path.join(REPORTS_DIR, "anomaly_report.csv")
 log_file = os.path.join(REPORTS_DIR, "anomaly_log.csv")
-status_log = os.path.join(REPORTS_DIR, "status.log")
 
 if not anomalies.empty:
     print("🚨 Anomalies detected!")
@@ -89,17 +88,8 @@ if not anomalies.empty:
 
     print(f"📝 Anomalies logged in '{log_file}'")
 
-    # 🟠 Append detection status
-    with open(status_log, "a", encoding="utf-8") as f:
-        f.write(f"{timestamp} ❌ Anomalies detected in run {run_id} (commit: {github_sha})\n")
-
 else:
     print("✅ No anomalies detected.")
-    # Delete old reports if present
     for file in [report_md, report_csv]:
         if os.path.exists(file):
             os.remove(file)
-
-    # 🟢 Append clean status
-    with open(status_log, "a", encoding="utf-8") as f:
-        f.write(f"{timestamp} ✅ No anomalies detected in run {run_id} (commit: {github_sha})\n")

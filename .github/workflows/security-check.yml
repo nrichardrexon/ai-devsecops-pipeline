@@ -45,15 +45,6 @@ jobs:
         run: |
           python detect.py || echo "Anomaly script failed."
 
-      # 🆕 REPLACED old anomaly check
-      - name: ❌ Fail Build if Anomalies Detected
-        if: always()
-        run: |
-          if grep -q "❌ Anomalies detected" reports/status.log; then
-            echo "🚨 Anomalies detected — failing the build."
-            exit 1
-          fi
-
       - name: 📤 Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -71,6 +62,14 @@ jobs:
           git add reports/*
           git commit -m "📄 Add security and anomaly reports [CI]" || echo "No changes to commit."
           git push origin main || echo "Push skipped (possible conflict)."
+
+      - name: ❌ Fail Build if Anomalies Detected
+        if: always()
+        run: |
+          if [ -f reports/anomaly_report.md ]; then
+            echo "🚨 Anomalies detected — failing the build."
+            exit 1
+          fi
 
       - name: ❌ Fail Build on Bandit Issues
         if: always()
